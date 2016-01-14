@@ -1,4 +1,4 @@
-/*! dashevolution - v0.0.22 - 2016-01-13
+/*! dashevolution - v0.0.22 - 2016-01-14
  * Copyright (c) 2016 Perry Woodin <perry@node40.com>;
  * Licensed 
  */
@@ -265,7 +265,7 @@ angular.module('converters', [])
 				url: '/converters',
 				views: {
 					'main@root': {
-						template: 'converters/converters.tpl.html',
+						templateUrl: 'converters/converters.tpl.html',
 						controller: 'ConvertersCtrl as convertersCtrl'
 					}
 				}
@@ -415,11 +415,13 @@ angular.module('signup.confirm', [])
 			to = $stateParams.to,
 			code = $stateParams.code;
 
+		confirmCtrl.showLoading = true;
+
 		if(!from || !to || !code){
 			$state.go('root.home');	
 		} else {
 			var validate = function(){
-					UserService.validate(from,to,code).then(function(response){
+				UserService.validate(from,to,code).then(function(response){
 					$log.log('validate() response', response);
 					if(response.error_id){
 						var errors = [];
@@ -427,6 +429,7 @@ angular.module('signup.confirm', [])
 						$rootScope.$broadcast('ErrorAlert',errors);
 						return;
 					}
+					confirmCtrl.showLoading = false;
 					confirmCtrl.success = true;
 					confirmCtrl.confirmation = response.data;
 				});
@@ -455,7 +458,7 @@ angular.module('signup', [
 			});
 	}])
 
-	.controller('SignupCtrl', ['$rootScope', '$log', '$timeout', '$uibModal', 'UserService', 'ENDPOINTS', function ($rootScope, $log, $timeout, $uibModal, UserService, ENDPOINTS) {
+	.controller('SignupCtrl', ['$rootScope', '$scope', '$log', '$timeout', '$uibModal', 'UserService', 'ENDPOINTS', function ($rootScope, $scope, $log, $timeout, $uibModal, UserService, ENDPOINTS) {
 		var signupCtrl = this;
 
 		// ************************** BEGIN - Private Methods **************************
@@ -507,6 +510,8 @@ angular.module('signup', [
 
 				// Clear out the user details.
 				signupCtrl.newUser = {};
+				// Reset the form validation.
+				signupCtrl.form.$setPristine();
 			});
 		};
 		// ************************** //END - Private Methods **************************
@@ -533,7 +538,7 @@ angular.module('signup', [
 ;
 
 
-angular.module('templates.app', ['common/alerts/errors/alerts-default-modal.tpl.html', 'common/alerts/errors/alerts-errors-modal.tpl.html', 'common/alerts/errors/alerts-info-modal.tpl.html', 'common/layout/footer.tpl.html', 'common/layout/header.tpl.html', 'common/layout/main.tpl.html', 'home/home.tpl.html', 'signup/confirm/confirm.tpl.html', 'signup/fake-email-modal.tpl.html', 'signup/pending-modal.tpl.html', 'signup/signup.tpl.html']);
+angular.module('templates.app', ['common/alerts/errors/alerts-default-modal.tpl.html', 'common/alerts/errors/alerts-errors-modal.tpl.html', 'common/alerts/errors/alerts-info-modal.tpl.html', 'common/layout/footer.tpl.html', 'common/layout/header.tpl.html', 'common/layout/main.tpl.html', 'converters/converters.tpl.html', 'home/home.tpl.html', 'signup/confirm/confirm.tpl.html', 'signup/fake-email-modal.tpl.html', 'signup/pending-modal.tpl.html', 'signup/signup.tpl.html']);
 
 angular.module("common/alerts/errors/alerts-default-modal.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("common/alerts/errors/alerts-default-modal.tpl.html",
@@ -614,7 +619,7 @@ angular.module("common/layout/header.tpl.html", []).run(["$templateCache", funct
     "						<li class=\"divider\"></li>\n" +
     "						<li><a ui-sref=\"root.signup\">Signup</a></li>\n" +
     "						<li><a ui-sref=\"root.converters\">Search Converters</a></li>\n" +
-    "						<li><a ui-sref=\"root.documentation\">Documentation</a></li>\n" +
+    "						<li><a href=\"https://www.dash.org/evolution/\">Documentation</a></li>\n" +
     "					</ul>\n" +
     "				</li>\n" +
     "			</ul>\n" +
@@ -636,9 +641,26 @@ angular.module("common/layout/main.tpl.html", []).run(["$templateCache", functio
     "<div class=\"row\" ui-view=\"footer\"></div>");
 }]);
 
+angular.module("converters/converters.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("converters/converters.tpl.html",
+    "<div class=\"row\">\n" +
+    "	<div class=\"col-sm-6\">\n" +
+    "		<h1>Converters</h1>\n" +
+    "		<ul style=\"font-size:2em;\">\n" +
+    "			<li style=\"padding:.5em 0;\">Search for users that want to sell Dash.</li>\n" +
+    "			<li style=\"padding:.5em 0;\">Buy some Dash.</li>\n" +
+    "			<li style=\"padding:.5em 0;\">Rate them for their service!</li>\n" +
+    "		</ul>\n" +
+    "	</div>\n" +
+    "	<div class=\"col-sm-6\">\n" +
+    "		<img class=\"img-responsive\" src=\"img/converters_map.png\"/>\n" +
+    "	</div>\n" +
+    "</div>");
+}]);
+
 angular.module("home/home.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("home/home.tpl.html",
-    "<p>Radio telescope explorations Vangelis. Tingling of the spine explorations permanence of the stars billions upon billions Apollonius of Perga white dwarf radio telescope! Euclid tesseract bits of moving fluff encyclopaedia galactica finite but unbounded? Bits of moving fluff, finite but unbounded are creatures of the cosmos! Muse about, Cambrian explosion, encyclopaedia galactica the ash of stellar alchemy. Corpus callosum! Great turbulent clouds extraordinary claims require extraordinary evidence a very small stage in a vast cosmic arena Vangelis Hypatia star stuff harvesting star light.</p>\n" +
+    "<p>Signup for a Dash Evolution username.</p>\n" +
     "\n" +
     "<div class=\"row push-down\">\n" +
     "	<div class=\"col-xs-4 text-center\">\n" +
@@ -648,7 +670,7 @@ angular.module("home/home.tpl.html", []).run(["$templateCache", function($templa
     "		<button class=\"btn btn-primary\" ui-sref=\"root.converters\">Search Converters</button>\n" +
     "	</div>\n" +
     "	<div class=\"col-xs-4 text-center\">\n" +
-    "		<button class=\"btn btn-primary\" ui-sref=\"root.documentation\">Documentation</button>\n" +
+    "		<a class=\"btn btn-primary\" href=\"https://www.dash.org/evolution/\">Documentation</a>\n" +
     "	</div>\n" +
     "\n" +
     "</div>");
@@ -656,6 +678,10 @@ angular.module("home/home.tpl.html", []).run(["$templateCache", function($templa
 
 angular.module("signup/confirm/confirm.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("signup/confirm/confirm.tpl.html",
+    "<div ng-if=\"confirmCtrl.showLoading\">\n" +
+    "	Validating your account, please stand by...\n" +
+    "</div>\n" +
+    "\n" +
     "<div ng-if=\"confirmCtrl.success\">\n" +
     "	<p>Thank you for validating your Dashpay account.</p> \n" +
     "\n" +
@@ -705,20 +731,20 @@ angular.module("signup/pending-modal.tpl.html", []).run(["$templateCache", funct
 
 angular.module("signup/signup.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("signup/signup.tpl.html",
-    "<form name=\"form\" class=\"form-horizontal\" novalidate>\n" +
-    "	<div class=\"form-group\" ng-class=\"{'has-error':form.username.$invalid && form.username.$dirty, 'has-success':form.username.$valid}\">\n" +
+    "<form name=\"signupCtrl.form\" class=\"form-horizontal\" novalidate>\n" +
+    "	<div class=\"form-group\" ng-class=\"{'has-error':signupCtrl.form.username.$invalid && signupCtrl.form.username.$dirty, 'has-success':signupCtrl.form.username.$valid}\">\n" +
     "		<label for=\"inputUsername\" class=\"col-sm-2 control-label\">Username</label>\n" +
     "		<div class=\"col-sm-10\">\n" +
     "			<input ng-model=\"signupCtrl.newUser.username\" name=\"username\" type=\"text\" class=\"form-control\" id=\"inputUsername\" placeholder=\"Username\" required>\n" +
     "		</div>\n" +
     "	</div>\n" +
-    "	<div class=\"form-group\" ng-class=\"{'has-error':form.email.$invalid && form.email.$dirty, 'has-success':form.email.$valid}\">\n" +
+    "	<div class=\"form-group\" ng-class=\"{'has-error':signupCtrl.form.email.$invalid && signupCtrl.form.email.$dirty, 'has-success':signupCtrl.form.email.$valid}\">\n" +
     "		<label for=\"inputEmail\" class=\"col-sm-2 control-label\">Email</label>\n" +
     "		<div class=\"col-sm-10\">\n" +
     "			<input ng-model=\"signupCtrl.newUser.email\" name=\"email\" type=\"email\" class=\"form-control\" id=\"inputEmail\" placeholder=\"Email\" required>\n" +
     "		</div>\n" +
     "	</div>\n" +
-    "	<!-- <div class=\"form-group\" ng-class=\"{'has-error':form.rootPubkey.$invalid && form.rootPubkey.$dirty, 'has-success':form.rootPubkey.$valid}\">\n" +
+    "	<!-- <div class=\"form-group\" ng-class=\"{'has-error':signupCtrl.form.rootPubkey.$invalid && signupCtrl.form.rootPubkey.$dirty, 'has-success':signupCtrl.form.rootPubkey.$valid}\">\n" +
     "		<label for=\"inputPubkey\" class=\"col-sm-2 control-label\">Root Pubkey</label>\n" +
     "		<div class=\"col-sm-10\">\n" +
     "			<input ng-model=\"signupCtrl.newUser.rootPubkey\" name=\"rootPubkey\" type=\"text\" class=\"form-control\" id=\"inputPubkey\" placeholder=\"Root Pubkey\" required>\n" +
@@ -726,7 +752,7 @@ angular.module("signup/signup.tpl.html", []).run(["$templateCache", function($te
     "	</div> -->\n" +
     "	<div class=\"form-group\">\n" +
     "		<div class=\"col-sm-offset-2 col-sm-10\">\n" +
-    "			<button ng-click=\"signupCtrl.signUp()\" ng-disabled=\"form.$invalid\" type=\"submit\" class=\"btn btn-primary\">Signup</button>\n" +
+    "			<button ng-click=\"signupCtrl.signUp()\" ng-disabled=\"signupCtrl.form.$invalid\" type=\"submit\" class=\"btn btn-primary\">Signup</button>\n" +
     "		</div>\n" +
     "	</div>\n" +
     "</form>");
